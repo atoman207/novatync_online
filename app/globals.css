@@ -1009,6 +1009,54 @@ section {
   transform: scale(1.06);
 }
 
+/* shimmer shown while the screenshot is being fetched/generated */
+.shot-skeleton {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.03) 30%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.03) 70%
+  );
+  background-size: 220% 100%;
+  animation: shotShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shotShimmer {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+/* branded tile shown only if every screenshot provider fails */
+.shot-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.shot-fallback img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.shot-fallback span {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .shot-media::after {
   content: "";
   position: absolute;
@@ -1086,6 +1134,107 @@ section {
 
 .shot-card:hover .site-arrow {
   transform: translate(3px, -3px);
+}
+
+/* ============ REVIEWS ============ */
+.reviews-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.reviews-summary-text {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+}
+
+.reviews-summary-text b {
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.stars {
+  display: inline-flex;
+  gap: 3px;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.star {
+  color: rgba(255, 255, 255, 0.14);
+}
+
+.star.filled {
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(240, 192, 90, 0.45);
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.review-card {
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(10, 12, 20, 0.72);
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-card:hover {
+  transform: translateY(-7px);
+  border-color: var(--border);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
+.review-text {
+  color: var(--text-dim);
+  font-size: 0.94rem;
+  line-height: 1.7;
+  flex-grow: 1;
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.review-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
+  border: 1px solid var(--border);
+}
+
+.review-meta h4 {
+  font-family: var(--font-display);
+  font-size: 0.96rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.review-meta span {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.reviews-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
 }
 
 /* ============ CONTACT ============ */

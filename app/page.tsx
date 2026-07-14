@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import AvatarCoin3D from "./AvatarCoin3D";
 import Background3D from "./Background3D";
+import SiteShot from "./SiteShot";
 
 /* ---------------- Data ---------------- */
 
@@ -189,6 +190,107 @@ const SITE_CATEGORIES: SiteCategory[] = [
 
 const TOTAL_SITES = SITE_CATEGORIES.reduce((n, c) => n + c.sites.length, 0);
 
+type Review = {
+  name: string;
+  role: string;
+  rating: number;
+  text: string;
+  avatarId: number;
+};
+
+/* Avatar photos served by pravatar.cc (https://i.pravatar.cc/150?img=N, N = 1-70) */
+const REVIEWS: Review[] = [
+  {
+    name: "Sarah Mitchell",
+    role: "Founder, Nexty SaaS",
+    rating: 5,
+    text: "Yuco rebuilt our entire platform from the ground up and integrated AI features we didn't think were possible on our timeline. Communication was excellent throughout and the code quality is outstanding.",
+    avatarId: 47,
+  },
+  {
+    name: "David Chen",
+    role: "CTO, FuseBase",
+    rating: 5,
+    text: "One of the best full-stack engineers we've worked with. He owns problems end-to-end — frontend, backend, infra — and always ships on time with clean, maintainable code.",
+    avatarId: 12,
+  },
+  {
+    name: "Amelia Rousseau",
+    role: "Product Lead, Elium",
+    rating: 5,
+    text: "The RAG pipeline Yuco built for our knowledge base cut support response times dramatically. Deep AI expertise combined with strong product sense — rare combination.",
+    avatarId: 44,
+  },
+  {
+    name: "Marcus Webb",
+    role: "CEO, Stepper.io",
+    rating: 5,
+    text: "Automated three of our most painful manual workflows in under two weeks. ROI was immediate. Yuco clearly understands business impact, not just code.",
+    avatarId: 13,
+  },
+  {
+    name: "Priya Anand",
+    role: "Founder, Black Ember",
+    rating: 4,
+    text: "Great collaborator, very responsive and detail-oriented on the e-commerce build. A couple of minor revisions were needed but he handled feedback fast and professionally.",
+    avatarId: 29,
+  },
+  {
+    name: "Lucas Ferreira",
+    role: "Head of Eng, Fast.io",
+    rating: 5,
+    text: "Solid architecture decisions from day one. The Kubernetes setup and CI/CD pipeline he put together have scaled effortlessly as our traffic grew 10x.",
+    avatarId: 14,
+  },
+  {
+    name: "Nina Kowalski",
+    role: "Operations Director, Bookitit",
+    rating: 5,
+    text: "Yuco automated our entire booking and reminder system. What used to take our team hours every day now runs itself. Couldn't be happier with the result.",
+    avatarId: 45,
+  },
+  {
+    name: "James O'Connor",
+    role: "Founder, SimpleKPI",
+    rating: 5,
+    text: "Exceptional analytics dashboard work — fast, accurate and beautifully designed. Yuco also proactively suggested improvements we hadn't even thought of.",
+    avatarId: 15,
+  },
+  {
+    name: "Elena Vasquez",
+    role: "Marketing Director, LAK Gallery",
+    rating: 4,
+    text: "Delivered a gorgeous storefront that matches our brand perfectly. Turnaround was quick and he was patient with our many design change requests.",
+    avatarId: 48,
+  },
+  {
+    name: "Tom Richardson",
+    role: "VP Engineering, Makers Den",
+    rating: 5,
+    text: "We brought Yuco in to modernize legacy infrastructure and integrate LLM agents. The migration was seamless with zero downtime — genuinely impressive work.",
+    avatarId: 18,
+  },
+  {
+    name: "Hana Kobayashi",
+    role: "Founder, Starcloud",
+    rating: 5,
+    text: "Incredibly reliable and communicative. Every milestone was delivered ahead of schedule, and the AI integrations he built are already driving real revenue for us.",
+    avatarId: 49,
+  },
+  {
+    name: "Robert Diaz",
+    role: "Product Manager, Rezo Zero",
+    rating: 5,
+    text: "Top-tier full-stack and AI engineering talent. Yuco translated vague requirements into a polished, production-ready product faster than any contractor we've hired before.",
+    avatarId: 22,
+  },
+];
+
+const REVIEWS_PREVIEW_COUNT = 3;
+const AVG_RATING = (
+  REVIEWS.reduce((sum, r) => sum + r.rating, 0) / REVIEWS.length
+).toFixed(1);
+
 const STATS = [
   { value: "7+", label: "Years of Experience" },
   { value: "50+", label: "Projects Delivered" },
@@ -230,11 +332,24 @@ function useTypewriter(words: string[]) {
   return text;
 }
 
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="stars" aria-label={`${rating} out of 5 stars`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} className={i < rating ? "star filled" : "star"}>
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /* ---------------- Page ---------------- */
 
 export default function Home() {
   const typed = useTypewriter(ROLES);
   const [scrolled, setScrolled] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -303,6 +418,7 @@ export default function Home() {
             <li><a href="#about">About</a></li>
             <li><a href="#skills">Skills</a></li>
             <li><a href="#projects">Projects</a></li>
+            <li><a href="#reviews">Reviews</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
         </div>
@@ -490,21 +606,20 @@ export default function Home() {
                     onAnimationEnd={endSpin}
                     style={{ "--accent": cat.c1 } as React.CSSProperties}
                   >
-                    <div className="shot-media">
-                      <img
-                        src={`https://s0.wp.com/mshots/v1/${encodeURIComponent(
-                          site.url
-                        )}?w=800&h=500`}
-                        alt={`Screenshot of ${site.name}`}
-                        loading="lazy"
-                      />
+                    <SiteShot
+                      url={site.url}
+                      name={site.name}
+                      domain={site.domain}
+                      accent={cat.c1}
+                      accent2={cat.c2}
+                    >
                       <span
                         className="shot-tag"
                         style={{ color: cat.c1, borderColor: `${cat.c1}55` }}
                       >
                         {cat.icon} {cat.title}
                       </span>
-                    </div>
+                    </SiteShot>
                     <div className="shot-body">
                       <div
                         className="site-favicon"
@@ -529,6 +644,63 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ===== REVIEWS ===== */}
+      <section id="reviews" className="section section-alt">
+        <div className="container">
+          <div className="section-head reveal">
+            <div className="section-eyebrow">Client Feedback</div>
+            <h2>
+              What Clients <span className="gradient-text">Say</span>
+            </h2>
+            <div className="reviews-summary">
+              <StarRating rating={Math.round(Number(AVG_RATING))} />
+              <span className="reviews-summary-text">
+                <b>{AVG_RATING}</b> out of 5 — based on {REVIEWS.length} reviews
+              </span>
+            </div>
+          </div>
+          <div className="reviews-grid">
+            {(showAllReviews ? REVIEWS : REVIEWS.slice(0, REVIEWS_PREVIEW_COUNT)).map(
+              (r, i) => (
+                <div
+                  key={r.name}
+                  className={`review-card${i < REVIEWS_PREVIEW_COUNT ? " reveal" : ""}`}
+                  {...tilt}
+                >
+                  <StarRating rating={r.rating} />
+                  <p className="review-text">&ldquo;{r.text}&rdquo;</p>
+                  <div className="review-author">
+                    <img
+                      className="review-avatar"
+                      src={`https://i.pravatar.cc/150?img=${r.avatarId}`}
+                      alt={r.name}
+                      loading="lazy"
+                      width={44}
+                      height={44}
+                    />
+                    <div className="review-meta">
+                      <h4>{r.name}</h4>
+                      <span>{r.role}</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+          {REVIEWS.length > REVIEWS_PREVIEW_COUNT && (
+            <div className="reviews-more reveal">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setShowAllReviews((v) => !v)}
+              >
+                {showAllReviews ? "See Less ↑" : `See More (${REVIEWS.length - REVIEWS_PREVIEW_COUNT} more) ↓`}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
