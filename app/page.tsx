@@ -189,26 +189,6 @@ const SITE_CATEGORIES: SiteCategory[] = [
 
 const TOTAL_SITES = SITE_CATEGORIES.reduce((n, c) => n + c.sites.length, 0);
 
-type LinkItem = {
-  badge: string;
-  name: string;
-  desc: string;
-  url: string;
-};
-
-const LINKS: LinkItem[] = [
-  { badge: "GH", name: "GitHub", desc: "Open-source projects, libraries & experiments", url: "https://github.com/" },
-  { badge: "in", name: "LinkedIn", desc: "Professional profile, experience & endorsements", url: "https://www.linkedin.com/" },
-  { badge: "🤗", name: "Hugging Face", desc: "Published models, datasets & AI Spaces", url: "https://huggingface.co/" },
-  { badge: "K", name: "Kaggle", desc: "ML competitions, notebooks & datasets", url: "https://www.kaggle.com/" },
-  { badge: "𝕏", name: "X / Twitter", desc: "AI engineering threads & product build-logs", url: "https://x.com/" },
-  { badge: "M", name: "Medium", desc: "In-depth articles on LLMs, RAG & system design", url: "https://medium.com/" },
-  { badge: "DEV", name: "Dev.to", desc: "Tutorials & write-ups for the dev community", url: "https://dev.to/" },
-  { badge: "SO", name: "Stack Overflow", desc: "Answers on AI, TypeScript & Python", url: "https://stackoverflow.com/" },
-  { badge: "LC", name: "LeetCode", desc: "Algorithms, data structures & contest history", url: "https://leetcode.com/" },
-  { badge: "▶", name: "YouTube", desc: "Live-coding sessions & AI engineering talks", url: "https://www.youtube.com/" },
-];
-
 const STATS = [
   { value: "7+", label: "Years of Experience" },
   { value: "50+", label: "Projects Delivered" },
@@ -552,43 +532,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== CONNECT / LINKS ===== */}
-      <section id="connect" className="section">
-        <div className="container">
-          <div className="section-head reveal">
-            <div className="section-eyebrow">Find Me Online</div>
-            <h2>
-              Connect <span className="gradient-text">Everywhere</span>
-            </h2>
-            <p>
-              Code, writing, models and conversations — pick your platform.
-            </p>
-          </div>
-          <div className="links-grid">
-            {LINKS.map((l) => (
-              <a
-                key={l.name}
-                className="link-card reveal"
-                href={l.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                {...tilt}
-              >
-                <div className="link-badge">{l.badge}</div>
-                <div className="link-meta">
-                  <h3>
-                    {l.name} <span className="arrow">↗</span>
-                  </h3>
-                  <p>{l.desc}</p>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ===== CONTACT ===== */}
-      <section id="contact" className="section" style={{ paddingTop: 0 }}>
+      <section id="contact" className="section">
         <div className="container">
           <div className="contact-card reveal">
             <div className="section-eyebrow">Let&apos;s Build Together</div>

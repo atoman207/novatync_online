@@ -49,6 +49,19 @@ export default function Background3D() {
     const mount = mountRef.current;
     if (!mount) return;
 
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+        failIfMajorPerformanceCaveat: false,
+      });
+    } catch {
+      // WebGL unavailable (software/Mesa GPU, blocked context, etc.) — skip 3D bg
+      return;
+    }
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       60,
@@ -58,7 +71,6 @@ export default function Background3D() {
     );
     camera.position.z = 11;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     mount.appendChild(renderer.domElement);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 /* Soft round dot for particles */
@@ -73,17 +73,30 @@ function makeBackTexture(): THREE.CanvasTexture {
 
 export default function AvatarCoin3D() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [webglFailed, setWebglFailed] = useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+        failIfMajorPerformanceCaveat: false,
+      });
+    } catch {
+      setWebglFailed(true);
+      return;
+    }
 
     /* ---------- renderer / scene / camera ---------- */
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     camera.position.set(0, 0, 4.6);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mount.clientWidth, mount.clientHeight || mount.clientWidth);
     mount.appendChild(renderer.domElement);
@@ -358,6 +371,14 @@ export default function AvatarCoin3D() {
       }
     };
   }, []);
+
+  if (webglFailed) {
+    return (
+      <div className="avatar3d-canvas avatar3d-fallback" aria-label="Portrait of Yuco">
+        <img src="/avatar3.jpg" alt="Yuco" />
+      </div>
+    );
+  }
 
   return <div ref={mountRef} className="avatar3d-canvas" aria-label="3D golden orb with portrait of Yuco" />;
 }
