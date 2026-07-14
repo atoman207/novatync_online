@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { createSafeRenderer } from "./webgl";
 
 /* Soft round dot for particles */
 function makeDotTexture(): THREE.CanvasTexture {
@@ -79,15 +80,8 @@ export default function AvatarCoin3D() {
     const mount = mountRef.current;
     if (!mount) return;
 
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true,
-        powerPreference: "high-performance",
-        failIfMajorPerformanceCaveat: false,
-      });
-    } catch {
+    const renderer = createSafeRenderer({ alpha: true });
+    if (!renderer) {
       setWebglFailed(true);
       return;
     }
@@ -343,10 +337,20 @@ export default function AvatarCoin3D() {
     };
     animate();
 
+    // if the GPU process dies mid-session, drop to the static fallback
+    // instead of freezing on a blank/black canvas
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      cancelAnimationFrame(raf);
+      setWebglFailed(true);
+    };
+    renderer.domElement.addEventListener("webglcontextlost", onContextLost);
+
     /* ---------- cleanup ---------- */
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       mount.removeEventListener("pointerdown", onPointerDown);
