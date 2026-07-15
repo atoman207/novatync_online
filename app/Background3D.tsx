@@ -39,75 +39,6 @@ const STACK_ICONS: [slug: string, color: string][] = [
 ];
 
 /**
- * Lightweight canvas-2D starfield used when WebGL is unavailable (headless
- * browsers, software/virtual GPUs, sandboxed embedded previews, etc.) so the
- * page always has an ambient animated background instead of a static image.
- * Canvas 2D has no GPU dependency, so this works essentially everywhere.
- */
-function render2DFallback(mount: HTMLDivElement): () => void {
-  const canvas = document.createElement("canvas");
-  canvas.style.position = "absolute";
-  canvas.style.inset = "0";
-  mount.appendChild(canvas);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return () => { if (canvas.parentNode === mount) mount.removeChild(canvas); };
-
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  const palette = ["#f0c05a", "#ffd97a", "#4f7cff", "#4dd6ff", "#ffffff"];
-  type Star = { x: number; y: number; r: number; s: number; c: string; p: number };
-  let stars: Star[] = [];
-  let w = 0;
-  let h = 0;
-
-  const resize = () => {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w * DPR;
-    canvas.height = h * DPR;
-    canvas.style.width = `${w}px`;
-    canvas.style.height = `${h}px`;
-    const count = Math.round((w * h) / 5000);
-    stars = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 1.4 + 0.3,
-      s: Math.random() * 0.18 + 0.03,
-      c: palette[Math.floor(Math.random() * palette.length)],
-      p: Math.random() * Math.PI * 2,
-    }));
-  };
-  resize();
-  window.addEventListener("resize", resize);
-
-  let raf = 0;
-  const start = performance.now();
-  const animate = () => {
-    raf = requestAnimationFrame(animate);
-    const t = (performance.now() - start) / 1000;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    for (const star of stars) {
-      star.y += star.s;
-      if (star.y > h) star.y = 0;
-      const twinkle = 0.5 + Math.sin(t * 1.5 + star.p) * 0.5;
-      ctx.globalAlpha = 0.25 + twinkle * 0.55;
-      ctx.fillStyle = star.c;
-      ctx.beginPath();
-      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  };
-  animate();
-
-  return () => {
-    cancelAnimationFrame(raf);
-    window.removeEventListener("resize", resize);
-    if (canvas.parentNode === mount) mount.removeChild(canvas);
-  };
-}
-
-/**
  * Full-page ambient 3D scene rendered behind every section:
  * a drifting starfield plus glowing tech-stack logos flowing in
  * 3D space, with mouse parallax and scroll-linked camera depth.
@@ -121,14 +52,10 @@ export default function Background3D() {
 
     const renderer = createSafeRenderer({ alpha: true });
     if (!renderer) {
-      // No WebGL available anywhere — fall back to an animated 2D starfield
-      // so the background is never just a static image. This is a browser/
-      // device limitation (no GPU context available), not a build issue —
-      // logged so it's easy to confirm via DevTools on any deployment.
       console.warn(
-        "[Background3D] WebGL unavailable in this browser — using 2D canvas fallback. Check chrome://gpu for details."
+        "[Background3D] WebGL unavailable in this browser — 3D background will not render. Check chrome://gpu for details."
       );
-      return render2DFallback(mount);
+      return;
     }
 
     const scene = new THREE.Scene();
@@ -302,14 +229,9 @@ export default function Background3D() {
 
     // if the GPU process dies mid-session (common on constrained VMs), stop
     // cleanly instead of freezing on a blank/black canvas
-    let fallbackCleanup: (() => void) | null = null;
     const onContextLost = (e: Event) => {
       e.preventDefault();
       cancelAnimationFrame(raf);
-      if (renderer.domElement.parentNode === mount) {
-        mount.removeChild(renderer.domElement);
-      }
-      fallbackCleanup = render2DFallback(mount);
     };
     renderer.domElement.addEventListener("webglcontextlost", onContextLost);
 
@@ -320,7 +242,6 @@ export default function Background3D() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
-      fallbackCleanup?.();
       starGeo.dispose();
       (stars.material as THREE.PointsMaterial).map?.dispose();
       (stars.material as THREE.PointsMaterial).dispose();

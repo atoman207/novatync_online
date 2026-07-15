@@ -436,59 +436,6 @@ section {
   height: 100% !important;
 }
 
-.avatar3d-fallback {
-  display: grid;
-  place-items: center;
-  cursor: default;
-}
-
-.avatar3d-fallback::before {
-  content: "";
-  position: absolute;
-  inset: 6%;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    var(--gold-bright),
-    var(--blue),
-    var(--cyan),
-    var(--gold-deep),
-    var(--gold-bright)
-  );
-  filter: blur(3px);
-  opacity: 0.5;
-  animation: avatarRingSpin 7s linear infinite;
-}
-
-.avatar3d-fallback img {
-  position: relative;
-  width: 72%;
-  height: 72%;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid rgba(240, 192, 90, 0.55);
-  box-shadow:
-    0 0 40px rgba(240, 192, 90, 0.35),
-    0 0 80px rgba(79, 124, 255, 0.2);
-  animation: avatarFloat 4.5s ease-in-out infinite;
-}
-
-@keyframes avatarRingSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes avatarFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 .avatar-hint {
   position: absolute;
   left: 50%;

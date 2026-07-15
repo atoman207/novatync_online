@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { createSafeRenderer } from "./webgl";
 
@@ -74,7 +74,6 @@ function makeBackTexture(): THREE.CanvasTexture {
 
 export default function AvatarCoin3D() {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [webglFailed, setWebglFailed] = useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -82,12 +81,9 @@ export default function AvatarCoin3D() {
 
     const renderer = createSafeRenderer({ alpha: true });
     if (!renderer) {
-      // Same underlying cause as Background3D's fallback — no GPU/WebGL
-      // context available in this browser, not a deployment problem.
       console.warn(
-        "[AvatarCoin3D] WebGL unavailable in this browser — using static fallback. Check chrome://gpu for details."
+        "[AvatarCoin3D] WebGL unavailable in this browser — 3D avatar will not render. Check chrome://gpu for details."
       );
-      setWebglFailed(true);
       return;
     }
 
@@ -342,12 +338,11 @@ export default function AvatarCoin3D() {
     };
     animate();
 
-    // if the GPU process dies mid-session, drop to the static fallback
-    // instead of freezing on a blank/black canvas
+    // if the GPU process dies mid-session, stop cleanly instead of
+    // freezing on a blank/black canvas
     const onContextLost = (e: Event) => {
       e.preventDefault();
       cancelAnimationFrame(raf);
-      setWebglFailed(true);
     };
     renderer.domElement.addEventListener("webglcontextlost", onContextLost);
 
@@ -380,14 +375,6 @@ export default function AvatarCoin3D() {
       }
     };
   }, []);
-
-  if (webglFailed) {
-    return (
-      <div className="avatar3d-canvas avatar3d-fallback" aria-label="Portrait of Yuco">
-        <img src="/avatar3.jpg" alt="Yuco" />
-      </div>
-    );
-  }
 
   return <div ref={mountRef} className="avatar3d-canvas" aria-label="3D golden orb with portrait of Yuco" />;
 }
