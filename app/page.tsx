@@ -186,6 +186,20 @@ const SITE_CATEGORIES: SiteCategory[] = [
       { name: "Makers Den", url: "https://makersden.io/", domain: "makersden.io" },
     ],
   },
+  {
+    title: "Full-Stack Sites Using Next.js",
+    icon: "▲",
+    c1: "#8b7cf6",
+    c2: "#4c1d95",
+    sites: [
+      { name: "Natsumi Corporation", url: "https://natsumi-design.co.jp/", domain: "natsumi-design.co.jp" },
+      { name: "W・H Sanchoku", url: "http://wh-sanchoku.com/", domain: "wh-sanchoku.com" },
+      { name: "Lucky Coin Game", url: "https://luckybronzecoin.com/", domain: "luckybronzecoin.com" },
+      { name: "Retouch Salon", url: "https://retouch.salon/", domain: "retouch.salon" },
+      { name: "Retouch", url: "https://retouch.news/", domain: "retouch.news" },
+      { name: "The Kitchen Connection", url: "https://thekitchenconnection.net/", domain: "thekitchenconnection.net" },
+    ],
+  },
 ];
 
 const TOTAL_SITES = SITE_CATEGORIES.reduce((n, c) => n + c.sites.length, 0);
@@ -401,6 +415,62 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  /* Center-split cards (reviews + project screenshots): direction-aware —
+     while a row is on screen, it stays split apart as long as the user is
+     scrolling down, and collapses back to an overlapping center card the
+     moment they scroll up, rather than just reacting to entering/leaving
+     the viewport. Leaving the viewport always resets it so the row starts
+     collapsed again the next time it scrolls into view. */
+  useEffect(() => {
+    const els = rootRef.current?.querySelectorAll(".card-split");
+    if (!els || els.length === 0) return;
+
+    const intersecting = new Set<Element>();
+    let lastY = window.scrollY;
+    let direction: "down" | "up" = "down";
+    let ticking = false;
+
+    const applyDirection = () => {
+      intersecting.forEach((el) => {
+        el.classList.toggle("visible", direction === "down");
+      });
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY) direction = "down";
+      else if (y < lastY) direction = "up";
+      lastY = y;
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(applyDirection);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            intersecting.add(entry.target);
+            entry.target.classList.toggle("visible", direction === "down");
+          } else {
+            intersecting.delete(entry.target);
+            entry.target.classList.remove("visible");
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => observer.observe(el));
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div ref={rootRef}>
       <Background3D />
@@ -598,7 +668,7 @@ export default function Home() {
                 {cat.sites.map((site) => (
                   <a
                     key={site.url}
-                    className="shot-card"
+                    className="shot-card card-split"
                     href={site.url}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -667,7 +737,7 @@ export default function Home() {
               (r, i) => (
                 <div
                   key={r.name}
-                  className={`review-card${i < REVIEWS_PREVIEW_COUNT ? " reveal" : ""}`}
+                  className={`review-card${i < REVIEWS_PREVIEW_COUNT ? " card-split" : ""}`}
                   {...tilt}
                 >
                   <StarRating rating={r.rating} />

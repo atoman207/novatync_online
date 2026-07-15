@@ -1161,6 +1161,77 @@ section {
   gap: 24px;
 }
 
+/* Center-split choreography, shared by the reviews grid and the projects
+   grid: every row of 3 starts collapsed onto its middle card; the left and
+   right cards slide outward into place as the row scrolls into view, and —
+   because this uses transition (not a one-shot animation) plus a toggling
+   observer — they smoothly collapse back to center if the user scrolls back
+   up (or down) past the row, ready to replay next time it re-enters. */
+.reviews-grid .review-card.card-split,
+.sites-grid .shot-card.card-split {
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.reviews-grid .review-card.card-split:nth-child(3n + 1),
+.sites-grid .shot-card.card-split:nth-child(3n + 1) {
+  opacity: 0;
+  transform: translateX(112%) scale(0.92);
+  z-index: 2;
+}
+
+.reviews-grid .review-card.card-split:nth-child(3n),
+.sites-grid .shot-card.card-split:nth-child(3n) {
+  opacity: 0;
+  transform: translateX(-112%) scale(0.92);
+  z-index: 2;
+}
+
+.reviews-grid .review-card.card-split:nth-child(3n + 2),
+.sites-grid .shot-card.card-split:nth-child(3n + 2) {
+  opacity: 1;
+  transform: none;
+  z-index: 1;
+}
+
+.reviews-grid .review-card.card-split.visible,
+.sites-grid .shot-card.card-split.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reviews-grid .review-card.card-split.visible:hover {
+  transform: translateY(-7px);
+}
+
+@media (max-width: 860px) {
+  /* Cards stack in a single column on narrow screens — skip the side-slide
+     choreography and just fade/rise like the rest of the site's reveals. */
+  .reviews-grid .review-card.card-split:nth-child(3n + 1),
+  .reviews-grid .review-card.card-split:nth-child(3n + 2),
+  .reviews-grid .review-card.card-split:nth-child(3n),
+  .sites-grid .shot-card.card-split:nth-child(3n + 1),
+  .sites-grid .shot-card.card-split:nth-child(3n + 2),
+  .sites-grid .shot-card.card-split:nth-child(3n) {
+    opacity: 0;
+    transform: translateY(34px);
+    z-index: auto;
+  }
+
+  .reviews-grid .review-card.card-split.visible:nth-child(3n + 1),
+  .reviews-grid .review-card.card-split.visible:nth-child(3n + 2),
+  .reviews-grid .review-card.card-split.visible:nth-child(3n),
+  .sites-grid .shot-card.card-split.visible:nth-child(3n + 1),
+  .sites-grid .shot-card.card-split.visible:nth-child(3n + 2),
+  .sites-grid .shot-card.card-split.visible:nth-child(3n) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .review-card {
   padding: 30px;
   border-radius: 20px;
