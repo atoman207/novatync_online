@@ -122,7 +122,12 @@ export default function Background3D() {
     const renderer = createSafeRenderer({ alpha: true });
     if (!renderer) {
       // No WebGL available anywhere — fall back to an animated 2D starfield
-      // so the background is never just a static image.
+      // so the background is never just a static image. This is a browser/
+      // device limitation (no GPU context available), not a build issue —
+      // logged so it's easy to confirm via DevTools on any deployment.
+      console.warn(
+        "[Background3D] WebGL unavailable in this browser — using 2D canvas fallback. Check chrome://gpu for details."
+      );
       return render2DFallback(mount);
     }
 

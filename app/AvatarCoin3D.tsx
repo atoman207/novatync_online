@@ -82,6 +82,11 @@ export default function AvatarCoin3D() {
 
     const renderer = createSafeRenderer({ alpha: true });
     if (!renderer) {
+      // Same underlying cause as Background3D's fallback — no GPU/WebGL
+      // context available in this browser, not a deployment problem.
+      console.warn(
+        "[AvatarCoin3D] WebGL unavailable in this browser — using static fallback. Check chrome://gpu for details."
+      );
       setWebglFailed(true);
       return;
     }
